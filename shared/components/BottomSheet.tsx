@@ -1,16 +1,6 @@
-import { useEffect } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const SNAP_POINTS = {
-  CLOSED: SCREEN_HEIGHT,
-  OPEN: SCREEN_HEIGHT * 0.002,
-};
+import BottomSheetLib, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { StyleSheet } from "react-native";
 
 interface BottomSheetProps {
   visible: boolean;
@@ -19,56 +9,50 @@ interface BottomSheetProps {
 }
 
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
-  const translateY = useSharedValue(SNAP_POINTS.CLOSED);
+  const bottomSheetRef = useRef<BottomSheetLib>(null);
 
+  // Snap points: 70% de la pantalla abierto, cerrado fuera de vista
+  const snapPoints = useMemo(() => ["70%"], []);
+
+  // Animar apertura/cierre basado en `visible`
   useEffect(() => {
     if (visible) {
-      translateY.value = withTiming(SNAP_POINTS.OPEN, {
-        duration: 300,
-      });
+      bottomSheetRef.current?.snapToIndex(0);
     } else {
-      translateY.value = withTiming(SNAP_POINTS.CLOSED, {
-        duration: 300,
-      });
+      bottomSheetRef.current?.close();
     }
-  }, [visible, translateY]);
+  }, [visible]);
 
-  const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
+  // Callback cuando se cierra desde el gesture
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        // Cerrado completamente
+        onClose();
+      }
+    },
+    [onClose],
+  );
 
-  const overlayStyle = useAnimatedStyle(() => {
-    const progress = translateY.value / SNAP_POINTS.OPEN;
-    return {
-      opacity: Math.max(0, 1 - progress),
-      pointerEvents: "none" as const,
-    };
-  });
+  if (!visible) return null;
 
   return (
-    <>
-      <Animated.View style={[styles.overlay, overlayStyle]} />
-      <Animated.View style={[styles.container, sheetStyle]}>
-        <View style={styles.handleContainer}>
-          <View style={styles.handle} />
-        </View>
-        {children}
-      </Animated.View>
-    </>
+    <BottomSheetLib
+      ref={bottomSheetRef}
+      index={0}
+      snapPoints={snapPoints}
+      enablePanDownToClose
+      onChange={handleSheetChanges}
+      backgroundStyle={styles.background}
+      handleIndicatorStyle={styles.handle}
+    >
+      <BottomSheetView style={styles.content}>{children}</BottomSheetView>
+    </BottomSheetLib>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  container: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: SCREEN_HEIGHT * 0.7,
+  background: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -77,16 +61,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 10,
-    overflow: "hidden",
-  },
-  handleContainer: {
-    alignItems: "center",
-    paddingVertical: 12,
   },
   handle: {
+    backgroundColor: "#ddd",
     width: 40,
     height: 4,
-    backgroundColor: "#ddd",
     borderRadius: 2,
+  },
+  content: {
+    flex: 1,
   },
 });

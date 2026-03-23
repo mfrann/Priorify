@@ -17,11 +17,11 @@ export const PRIORITY_LABELS: Record<number, string> = {
 };
 
 export const CATEGORY_COLORS = {
-  WORK: "#4a90d9",
-  PERSONAL: "#9b59b6",
-  STUDY: "#27ae60",
-  HEALTH: "#e74c3c",
-  FUN: "#f1c40f",
+  WORK: "#7fb3d3",
+  PERSONAL: "#c39bd3",
+  STUDY: "#82e0aa",
+  HEALTH: "#f1948a",
+  FUN: "#f7dc6f",
 };
 
 export const CATEGORY_LABELS = {
@@ -31,3 +31,5 @@ export const CATEGORY_LABELS = {
   HEALTH: "Health",
   FUN: "Fun",
 };
+
+export const NO_CATEGORY_COLOR = "#CCCCCC"; // gris neutral

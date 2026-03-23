@@ -44,6 +44,8 @@ export function TaskDetailCard({
   onDelete,
   onToggleComplete,
 }: TaskDetailCardProps) {
+  // El BottomSheet ya maneja visible={false}, pero mantenemos el return
+  // para el caso donde se llama sin task
   if (!task) return null;
 
   const formatDate = (dateString: string) => {
@@ -139,7 +141,7 @@ export function TaskDetailCard({
                 style={[styles.categoryBadge, { borderColor: categoryColor }]}
               >
                 {CategoryIcon && (
-                  <CategoryIcon size={14} color={categoryColor} />
+                  <CategoryIcon size={22} color={categoryColor} />
                 )}
                 <Text style={[styles.categoryText, { color: categoryColor }]}>
                   {categoryLabel}
@@ -307,15 +309,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 2,
     gap: 6,
   },
   categoryText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700",
   },
   dateRow: {
     flexDirection: "row",
@@ -344,7 +346,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1.5,
     borderColor: "rgba(231, 76, 60, 0.6)",
-    elevation: 2,
   },
   deleteText: {
     fontSize: 16,

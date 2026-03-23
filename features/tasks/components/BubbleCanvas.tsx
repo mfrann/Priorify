@@ -23,7 +23,7 @@ interface PositionedTask {
   scale: number;
 }
 
-const GAP = 20;
+const GAP = 15;
 
 const checkCollision = (
   x: number,
@@ -60,7 +60,7 @@ const generateRandomPosition = (
 const calculateLayout = (tasks: Task[]): PositionedTask[] => {
   if (tasks.length === 0) return [];
 
-  const sortedByPriority = [...tasks].sort((a, b) => b.priority - a.priority);
+  const sortedByPriority = [...tasks].sort((a, b) => a.priority - b.priority);
 
   const positions: PositionedTask[] = [];
 
