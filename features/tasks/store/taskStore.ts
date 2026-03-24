@@ -11,6 +11,7 @@ interface TaskStore {
   addTask: (task: Task) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
+  clearCompleted: () => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -72,6 +73,28 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     if (!success) {
       set({ tasks: currentTasks });
       console.error('Failed to remove task from storage');
+    }
+  },
+
+  clearCompleted: async () => {
+    const currentTasks = get().tasks;
+    const completedIds = currentTasks.filter((t) => t.completed).map((t) => t.id);
+    
+    if (completedIds.length === 0) return;
+
+    // Optimistic update
+    const newTasks = currentTasks.filter((t) => !t.completed);
+    set({ tasks: newTasks });
+
+    // Persist all deletions
+    const results = await Promise.all(
+      completedIds.map((id) => StorageService.removeTask(id)),
+    );
+    
+    if (results.some((success) => !success)) {
+      // Rollback if any failed
+      set({ tasks: currentTasks });
+      console.error('Some completed tasks failed to remove');
     }
   },
 

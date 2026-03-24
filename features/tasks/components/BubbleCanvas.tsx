@@ -5,7 +5,7 @@ import {
   NO_CATEGORY_COLOR,
 } from "@/shared/constants/theme";
 import { useMemo } from "react";
-import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BubbleItem } from "./BubbleItem";
 interface BubbleCanvasProps {
@@ -136,11 +136,22 @@ export function BubbleCanvas({
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[
+        styles.scrollContent,
+        tasks.length === 0 && styles.emptyContent,
+      ]}
       showsVerticalScrollIndicator={true}
     >
-      <View style={[styles.canvas, { height: canvasHeight }]}>
-        {positionedTasks.map(({ task, x, y, scale, colliding }, index) => {
+      {tasks.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>No tasks yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Tap + to create your first task
+          </Text>
+        </View>
+      ) : (
+        <View style={[styles.canvas, { height: canvasHeight }]}>
+          {positionedTasks.map(({ task, x, y, scale, colliding }, index) => {
           const bubbleSize = BUBBLE_SIZE[task.priority] * scale;
           const radius = bubbleSize / 2;
           const finalX = x - radius;
@@ -166,7 +177,8 @@ export function BubbleCanvas({
             />
           );
         })}
-      </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -176,6 +188,26 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  emptyContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: "#888",
+    textAlign: "center",
   },
   canvas: {
     width: BASE_CANVAS_WIDTH,

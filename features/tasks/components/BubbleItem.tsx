@@ -1,8 +1,8 @@
 import type { Task } from "@/features/tasks/types/task";
 import { BUBBLE_SIZE } from "@/shared/constants/theme";
-import { Check } from "lucide-react-native";
+import { CircleCheck } from "lucide-react-native";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -49,7 +49,9 @@ export function BubbleItem({
   // Texto adaptativo según tamaño de burbuja y largo del título
   const baseSize = size * 0.12;
   const lengthFactor = Math.max(0.5, 1 - (task.title.length - 5) * 0.025);
-  const dynamicFontSize = Math.round(Math.max(8, Math.min(baseSize * lengthFactor, 16)));
+  const dynamicFontSize = Math.round(
+    Math.max(8, Math.min(baseSize * lengthFactor, 16)),
+  );
   const maxLines = size < 80 ? 1 : 2;
 
   const scaleAnim = useSharedValue(0);
@@ -174,9 +176,12 @@ export function BubbleItem({
           ]}
         >
           {task.completed ? (
-            <Check size={dynamicFontSize + 10} color="#333" />
+            <CircleCheck size={dynamicFontSize + 13} color="#333" />
           ) : (
-            <Text style={[styles.text, { fontSize: dynamicFontSize }]} numberOfLines={maxLines}>
+            <Text
+              style={[styles.text, { fontSize: dynamicFontSize }]}
+              numberOfLines={maxLines}
+            >
               {task.title}
             </Text>
           )}

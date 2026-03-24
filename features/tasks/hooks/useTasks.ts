@@ -11,6 +11,7 @@ interface UseTasksReturn {
   addTask: (task: Task) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   removeTask: (id: string) => Promise<void>;
+  clearCompleted: () => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
   getTaskById: (id: string) => Task | undefined;
 }
@@ -47,6 +48,7 @@ export function useTasks(): UseTasksReturn {
     addTask: store.addTask,
     updateTask: store.updateTask,
     removeTask: store.removeTask,
+    clearCompleted: store.clearCompleted,
     toggleComplete: store.toggleComplete,
     getTaskById: store.getTaskById,
   };

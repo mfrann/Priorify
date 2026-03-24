@@ -32,3 +32,113 @@ const panGesture = Gesture.Pan()
 - [ ] Not implemented
 - [x] Basic swipe logic in place
 - [ ] Fix edge gesture conflict
+
+---
+
+## Calendar Improvements
+
+### 1. Streak Counter 🔥
+
+#### Description
+Display current streak (consecutive days with completed tasks) on the calendar screen.
+
+#### Implementation
+```tsx
+// Already have useStreak hook
+// Add to calendar header:
+<View style={styles.streakContainer}>
+  <Text>🔥</Text>
+  <Text>{streak} days</Text>
+</View>
+```
+
+#### Status
+- [ ] Not implemented
+- [x] useStreak hook exists
+
+---
+
+### 2. Month Stats
+
+#### Description
+Show statistics below the week view:
+- Total tasks completed this month
+- Best day (most tasks completed)
+- Average tasks per day
+
+#### UI
+```
+┌─────────────────────────────────┐
+│  ◀  March 2025  🔥 15 days  ▶ │
+│                                 │
+│  L   M   X   J   V   S   D    │
+│  ●●   ●   ●●   ●   ●●   ○   ○ │
+├─────────────────────────────────┤
+│  📊 March Stats                │
+│  Completed: 42                 │
+│  Best day: Tuesday (8)        │
+└─────────────────────────────────┘
+```
+
+#### Status
+- [ ] Not implemented
+
+---
+
+### 3. Quick Month Selector
+
+#### Description
+Dropdown or modal to quickly jump to any month.
+
+#### UI
+```
+◀  March 2025  ▼  ▶
+       ↓
+┌─────────────────┐
+│  January 2025   │
+│  February 2025   │
+│  March 2025  ← current
+│  April 2025      │
+│  May 2025        │
+└─────────────────┘
+```
+
+#### Status
+- [ ] Not implemented
+
+---
+
+### 4. Full Week Agenda
+
+#### Description
+Below the week view, show a scrollable agenda of all days in the week.
+
+#### UI
+```
+┌─────────────────────────────────┐
+│  ◀  Week 12  ▶                 │
+│  L   M   X   J   V   S   D    │
+│  ●●   ●   ●●   ●   ●●   ○   ○  │
+├─────────────────────────────────┤
+│  ── Monday 17 ──────────────   │
+│  ● 10:00  Team meeting          │
+│  ● 14:00  Call client          │
+│  ── Tuesday 18 ────────────   │
+│  ● 09:00  Gym                  │
+└─────────────────────────────────┘
+```
+
+#### Status
+- [ ] Not implemented
+
+---
+
+### 5. Week Strip (Completed ✅)
+
+Already implemented:
+- Week navigation (◀ ▶)
+- Day dots by category
+- Selected day highlighting
+- Today indicator
+- Week number badge
+- Month/year display
