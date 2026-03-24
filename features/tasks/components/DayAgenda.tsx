@@ -1,5 +1,5 @@
 import type { Task } from "@/features/tasks/types/task";
-import { CATEGORY_COLORS } from "@/shared/constants/theme";
+import { CATEGORY_COLORS, COLORS, NO_CATEGORY_COLOR } from "@/shared/constants/theme";
 import { CircleCheck } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -23,7 +23,7 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => (
         {
           backgroundColor: task.category
             ? CATEGORY_COLORS[task.category]
-            : "#ccc",
+            : NO_CATEGORY_COLOR,
         },
       ]}
     />
@@ -37,7 +37,7 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => (
     </View>
     {task.completed && (
       <View style={styles.checkmark}>
-        <CircleCheck size={22} color="#27ae60" />
+        <CircleCheck size={22} color={COLORS.success} />
       </View>
     )}
   </Pressable>
@@ -72,23 +72,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.background,
   },
   dateHeader: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#333",
+    color: COLORS.textPrimary,
     marginBottom: 16,
     marginTop: 20,
   },
   tasksList: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.surfaceElevated,
     borderRadius: 12,
   },
   emptyText: {
     fontSize: 16,
-    color: "#999",
+    color: COLORS.textDisabled,
     textAlign: "center",
     marginTop: 40,
   },
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: COLORS.divider,
   },
   categoryDot: {
     width: 12,
@@ -111,11 +111,11 @@ const styles = StyleSheet.create({
   },
   taskTitle: {
     fontSize: 16,
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   taskDescription: {
     fontSize: 13,
-    color: "#999",
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
   checkmark: {

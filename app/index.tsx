@@ -4,6 +4,7 @@ import { TaskDetailCard } from "@/features/tasks/components/TaskDetailCard";
 import { TaskForm } from "@/features/tasks/components/TaskForm";
 import { useTasks } from "@/features/tasks/hooks/useTasks";
 import type { Task, TaskInput } from "@/features/tasks/types/task";
+import { COLORS } from "@/shared/constants/theme";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -178,21 +179,21 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 45,
     fontWeight: "800",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   counterText: {
     fontSize: 14,
-    color: "#66666690",
+    color: COLORS.textSecondary,
     marginTop: 4,
   },
   fab: {
     position: "absolute",
-    bottom: 30,
+    bottom: 24,
     right: 24,
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#333333",
+    backgroundColor: COLORS.tabActive,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   },
   fabText: {
     fontSize: 32,
-    color: "#fff",
+    color: COLORS.textInverse,
     fontWeight: "500",
     lineHeight: 34,
   },

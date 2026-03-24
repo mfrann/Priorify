@@ -1,5 +1,5 @@
 import type { Task } from "@/features/tasks/types/task";
-import { BUBBLE_SIZE } from "@/shared/constants/theme";
+import { BUBBLE_SIZE, COLORS } from "@/shared/constants/theme";
 import { CircleCheck } from "lucide-react-native";
 import { useEffect } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
@@ -176,7 +176,7 @@ export function BubbleItem({
           ]}
         >
           {task.completed ? (
-            <CircleCheck size={dynamicFontSize + 13} color="#333" />
+            <CircleCheck size={dynamicFontSize + 13} color={COLORS.textPrimary} />
           ) : (
             <Text
               style={[styles.text, { fontSize: dynamicFontSize }]}
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 8,
-    shadowColor: "#888",
+    shadowColor: COLORS.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -208,6 +208,6 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: "600",
     textAlign: "center",
-    color: "#141414",
+    color: COLORS.textPrimary,
   },
 });

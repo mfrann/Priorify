@@ -142,3 +142,64 @@ Already implemented:
 - Today indicator
 - Week number badge
 - Month/year display
+
+---
+
+## Save Feedback
+
+### Description
+When a task is saved, there's no visual confirmation. Users might not realize the action completed.
+
+### Current Behavior
+- Form closes immediately after saving
+- No toast, haptic, or animation to confirm
+
+### Proposed Solution
+Add visual feedback after save:
+
+```typescript
+// Option 1: Haptic feedback
+import * as Haptics from 'expo-haptics';
+Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+// Option 2: Toast notification
+Toast.show({
+  message: 'Task saved!',
+  type: 'success',
+  duration: 2000,
+});
+
+// Option 3: Subtle animation on the saved bubble
+```
+
+### Status
+- [ ] Not implemented
+
+---
+
+## Settings Export
+
+### Description
+Export tasks to a JSON file for backup.
+
+### Current Behavior
+- Shows an alert with task count
+- No actual file export
+
+### Proposed Solution
+Use `expo-file-system` and `expo-sharing`:
+
+```typescript
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+
+const exportTasks = async () => {
+  const json = JSON.stringify(tasks, null, 2);
+  const uri = FileSystem.documentDirectory + 'priorify-backup.json';
+  await FileSystem.writeAsStringAsync(uri, json);
+  await Sharing.shareAsync(uri);
+};
+```
+
+### Status
+- [ ] Not implemented

@@ -1,6 +1,7 @@
 import type { Task } from "@/features/tasks/types/task";
-import { CATEGORY_COLORS } from "@/shared/constants/theme";
+import { CATEGORY_COLORS, COLORS, NO_CATEGORY_COLOR } from "@/shared/constants/theme";
 import { useMemo } from "react";
+import { Calendar } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface WeekViewProps {
@@ -10,7 +11,7 @@ interface WeekViewProps {
   onWeekChange: (date: Date) => void;
 }
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS_SHORT = ["S", "M", "T", "W", "T", "F", "S"];
 
 export function WeekView({
   tasks,
@@ -93,6 +94,10 @@ export function WeekView({
 
         <View style={styles.headerCenter}>
           <Text style={styles.monthText}>{monthName}</Text>
+          <Pressable onPress={goToToday} style={styles.todayButton}>
+            <Calendar size={14} color={COLORS.textSecondary} />
+            <Text style={styles.todayText}>Today</Text>
+          </Pressable>
         </View>
 
         <Pressable onPress={goToNextWeek} style={styles.navButton}>
@@ -121,7 +126,7 @@ export function WeekView({
               <Text
                 style={[styles.dayName, isSelected && styles.dayNameSelected]}
               >
-                {WEEKDAYS[index]}
+                {WEEKDAYS_SHORT[index]}
               </Text>
               <Text
                 style={[
@@ -144,7 +149,7 @@ export function WeekView({
                         {
                           backgroundColor: task.category
                             ? CATEGORY_COLORS[task.category]
-                            : "#ccc",
+                            : NO_CATEGORY_COLOR,
                         },
                       ]}
                     />
@@ -176,20 +181,35 @@ const styles = StyleSheet.create({
   headerCenter: {
     alignItems: "center",
   },
+  todayButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: COLORS.tabInactive,
+    borderRadius: 12,
+    gap: 4,
+  },
+  todayText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+  },
   monthText: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   navButton: {
     padding: 8,
   },
   navText: {
     fontSize: 24,
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   weekBadge: {
-    backgroundColor: "#333",
+    backgroundColor: COLORS.tabActive,
     paddingHorizontal: 20,
     paddingVertical: 5,
     borderRadius: 20,
@@ -197,7 +217,7 @@ const styles = StyleSheet.create({
   weekText: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "#fff",
+    color: COLORS.textInverse,
   },
   daysRow: {
     flexDirection: "row",
@@ -210,31 +230,31 @@ const styles = StyleSheet.create({
     minWidth: 44,
   },
   dayCellSelected: {
-    backgroundColor: "#333",
+    backgroundColor: COLORS.tabActive,
   },
   dayCellToday: {
     borderWidth: 2,
-    borderColor: "#27ae60",
+    borderColor: COLORS.success,
   },
   dayName: {
     fontSize: 11,
     fontWeight: "600",
-    color: "#999",
+    color: COLORS.textDisabled,
     marginBottom: 4,
   },
   dayNameSelected: {
-    color: "#fff",
+    color: COLORS.textInverse,
   },
   dayNumber: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   dayNumberSelected: {
-    color: "#fff",
+    color: COLORS.textInverse,
   },
   dayNumberToday: {
-    color: "#27ae60",
+    color: COLORS.success,
   },
   dotsContainer: {
     flexDirection: "row",
@@ -249,6 +269,6 @@ const styles = StyleSheet.create({
   },
   moreText: {
     fontSize: 8,
-    color: "#999",
+    color: COLORS.textDisabled,
   },
 });

@@ -1,45 +1,44 @@
-import { StyleSheet, Text, View, Pressable, Switch, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  BarChart3,
-  Bell,
-  Moon,
-  Download,
-  Trash2,
-  Info,
-  ChevronRight,
-  Check,
-} from "lucide-react-native";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
+import { COLORS } from "@/shared/constants/theme";
+import {
+  Bell,
+  ChevronRight,
+  Download,
+  Info,
+  Moon,
+  Trash2,
+} from "lucide-react-native";
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
   const { tasks, clearCompleted } = useTaskStore();
 
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t) => t.completed).length;
+  const doneTasks = tasks.filter((t) => t.completed).length;
   const completionRate =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   const handleExportData = () => {
     const data = JSON.stringify(tasks, null, 2);
     Alert.alert(
       "Export Data",
-      `Tasks exported:\n\nTotal: ${totalTasks}\nCompleted: ${completedTasks}\n\nData ready to copy (${data.length} bytes)`,
-      [{ text: "OK" }]
+      `Tasks exported:\n\nTotal: ${totalTasks}\nDone: ${doneTasks}\n\nData ready to copy (${data.length} bytes)`,
+      [{ text: "OK" }],
     );
     // TODO: Implement actual file export with expo-file-system
   };
 
   const handleClearCompleted = () => {
-    const completed = tasks.filter((t) => t.completed);
-    if (completed.length === 0) {
-      Alert.alert("No completed tasks", "There are no completed tasks to clear.");
+    const done = tasks.filter((t) => t.completed);
+    if (done.length === 0) {
+      Alert.alert("No done tasks", "There are no completed tasks to clear.");
       return;
     }
 
     Alert.alert(
       "Clear Completed",
-      `Remove ${completed.length} completed task${completed.length > 1 ? "s" : ""}?`,
+      `Remove ${done.length} done task${done.length > 1 ? "s" : ""}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -49,7 +48,7 @@ export default function SettingsScreen() {
             clearCompleted();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -62,18 +61,14 @@ export default function SettingsScreen() {
       <View style={styles.content}>
         {/* Statistics Section */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <BarChart3 size={18} color="#666" />
-            <Text style={styles.sectionTitle}>Statistics</Text>
-          </View>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{totalTasks}</Text>
               <Text style={styles.statLabel}>Total</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{completedTasks}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
+              <Text style={styles.statValue}>{doneTasks}</Text>
+              <Text style={styles.statLabel}>Done</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{completionRate}%</Text>
@@ -87,7 +82,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <View style={styles.itemRow}>
             <View style={styles.itemLeft}>
-              <Bell size={20} color="#333" />
+              <Bell size={20} color={COLORS.textPrimary} />
               <View style={styles.itemText}>
                 <Text style={styles.itemLabel}>Notifications</Text>
                 <Text style={styles.itemSubtitle}>Task reminders</Text>
@@ -96,26 +91,26 @@ export default function SettingsScreen() {
             <Switch
               value={true}
               onValueChange={() => {}}
-              trackColor={{ false: "#ddd", true: "#a8d4e6" }}
-              thumbColor="#fff"
+              trackColor={{ false: COLORS.tabInactive, true: COLORS.successLight }}
+              thumbColor={COLORS.textInverse}
             />
           </View>
 
           <View style={styles.divider} />
 
-          <View style={styles.itemRow}>
+          <View style={[styles.itemRow, styles.disabledRow]}>
             <View style={styles.itemLeft}>
-              <Moon size={20} color="#333" />
+              <Moon size={20} color={COLORS.textDisabled} />
               <View style={styles.itemText}>
-                <Text style={styles.itemLabel}>Dark Mode</Text>
-                <Text style={styles.itemSubtitle}>Coming soon</Text>
+                <Text style={styles.disabledLabel}>Dark Mode</Text>
+                <Text style={styles.disabledSubtitle}>Coming soon</Text>
               </View>
             </View>
             <Switch
               value={false}
               disabled
-              trackColor={{ false: "#ddd", true: "#a8d4e6" }}
-              thumbColor="#fff"
+              trackColor={{ false: COLORS.tabInactive, true: COLORS.successLight }}
+              thumbColor={COLORS.textInverse}
             />
           </View>
         </View>
@@ -124,23 +119,20 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Pressable style={styles.itemRow} onPress={handleExportData}>
             <View style={styles.itemLeft}>
-              <Download size={20} color="#333" />
+              <Download size={20} color={COLORS.textPrimary} />
               <View style={styles.itemText}>
                 <Text style={styles.itemLabel}>Export Data</Text>
                 <Text style={styles.itemSubtitle}>Save as JSON</Text>
               </View>
             </View>
-            <ChevronRight size={20} color="#ccc" />
+            <ChevronRight size={20} color={COLORS.textDisabled} />
           </Pressable>
 
           <View style={styles.divider} />
 
-          <Pressable
-            style={styles.itemRow}
-            onPress={handleClearCompleted}
-          >
+          <Pressable style={styles.itemRow} onPress={handleClearCompleted}>
             <View style={styles.itemLeft}>
-              <Trash2 size={20} color="#e74c3c" />
+              <Trash2 size={20} color={COLORS.destructive} />
               <View style={styles.itemText}>
                 <Text style={[styles.itemLabel, styles.destructiveText]}>
                   Clear Completed
@@ -148,7 +140,7 @@ export default function SettingsScreen() {
                 <Text style={styles.itemSubtitle}>Remove done tasks</Text>
               </View>
             </View>
-            <ChevronRight size={20} color="#ccc" />
+            <ChevronRight size={20} color={COLORS.textDisabled} />
           </Pressable>
         </View>
 
@@ -156,7 +148,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <View style={styles.itemRow}>
             <View style={styles.itemLeft}>
-              <Info size={20} color="#333" />
+              <Info size={20} color={COLORS.textPrimary} />
               <View style={styles.itemText}>
                 <Text style={styles.itemLabel}>About</Text>
                 <Text style={styles.itemSubtitle}>Version 1.0</Text>
@@ -172,41 +164,27 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: COLORS.surface,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 20,
+    marginTop: 20,
   },
   headerTitle: {
     fontSize: 45,
     fontWeight: "800",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   section: {
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.surfaceElevated,
     borderRadius: 12,
     marginBottom: 16,
     overflow: "hidden",
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#666",
-    marginLeft: 8,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   statsRow: {
     flexDirection: "row",
@@ -220,16 +198,16 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   statLabel: {
     fontSize: 12,
-    color: "#888",
+    color: COLORS.textSecondary,
     marginTop: 4,
   },
   statsHint: {
     fontSize: 13,
-    color: "#999",
+    color: COLORS.textDisabled,
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
@@ -252,19 +230,32 @@ const styles = StyleSheet.create({
   itemLabel: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#333",
+    color: COLORS.textPrimary,
   },
   itemSubtitle: {
     fontSize: 13,
-    color: "#888",
+    color: COLORS.textSecondary,
     marginTop: 2,
   },
   destructiveText: {
-    color: "#e74c3c",
+    color: COLORS.destructive,
+  },
+  disabledRow: {
+    opacity: 0.5,
+  },
+  disabledLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: COLORS.textDisabled,
+  },
+  disabledSubtitle: {
+    fontSize: 13,
+    color: COLORS.textDisabled,
+    marginTop: 2,
   },
   divider: {
     height: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: COLORS.divider,
     marginLeft: 48,
   },
 });
