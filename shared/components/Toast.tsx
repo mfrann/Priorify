@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     bottom: 100,
-    left: 30,
-    right: 30,
+    left: 100,
+    right: 100,
     flexDirection: "row",
     alignItems: "center",
     textAlign: "center",

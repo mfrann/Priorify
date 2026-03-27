@@ -1,62 +1,56 @@
-import { Tabs } from "expo-router";
-import { StyleSheet } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { Home, CalendarDays, Settings } from "lucide-react-native";
+import { Stack, Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ONBOARDING_KEY = "hasSeenOnboarding";
 
 export default function RootLayout() {
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        // FOR DEBUG: Always show onboarding
+        // Remove this line for production
+        await AsyncStorage.removeItem(ONBOARDING_KEY);
+        
+        const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setHasSeenOnboarding(value === "true");
+      } catch (error) {
+        console.error("Error checking onboarding:", error);
+        setHasSeenOnboarding(false);
+      }
+    };
+
+    checkOnboarding();
+  }, []);
+
+  if (hasSeenOnboarding === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#F0C4B8" />
+      </View>
+    );
+  }
+
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <BottomSheetModalProvider>
-        <Tabs
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: "#333",
-            tabBarInactiveTintColor: "#999",
-            tabBarStyle: {
-              height: 60,
-              paddingBottom: 8,
-              paddingTop: 8,
-            },
-            tabBarLabelStyle: {
-              fontSize: 12,
-              fontWeight: "600",
-            },
-          }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Home",
-            tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="calendar"
-          options={{
-            title: "Calendar",
-            tabBarIcon: ({ color, size }) => (
-              <CalendarDays size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="settings"
-          options={{
-            title: "Settings",
-            tabBarIcon: ({ color, size }) => (
-              <Settings size={size} color={color} />
-            ),
-          }}
-        />
-        </Tabs>
-        </BottomSheetModalProvider>
-      </GestureHandlerRootView>
+    <Stack screenOptions={{ headerShown: false }}>
+      {!hasSeenOnboarding && (
+        <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
+      )}
+      {hasSeenOnboarding && (
+        <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
+      )}
+    </Stack>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
   },
 });

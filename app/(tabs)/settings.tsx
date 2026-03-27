@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { useTaskStore } from "@/features/tasks/store/taskStore";
+import { usePreferencesStore } from "@/features/settings/store/preferencesStore";
 import { COLORS } from "@/shared/constants/theme";
 import {
   Bell,
@@ -8,25 +10,63 @@ import {
   Moon,
   Trash2,
 } from "lucide-react-native";
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, Text, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { documentDirectory, writeAsStringAsync } from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 
 export default function SettingsScreen() {
   const { tasks, clearCompleted } = useTaskStore();
+  const {
+    notificationsEnabled,
+    setNotificationsEnabled,
+    initialize: initPreferences,
+  } = usePreferencesStore();
+  const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    initPreferences();
+  }, [initPreferences]);
 
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter((t) => t.completed).length;
   const completionRate =
     totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-  const handleExportData = () => {
-    const data = JSON.stringify(tasks, null, 2);
-    Alert.alert(
-      "Export Data",
-      `Tasks exported:\n\nTotal: ${totalTasks}\nDone: ${doneTasks}\n\nData ready to copy (${data.length} bytes)`,
-      [{ text: "OK" }],
-    );
-    // TODO: Implement actual file export with expo-file-system
+  const handleExportData = async () => {
+    if (tasks.length === 0) {
+      Alert.alert("No Tasks", "You don't have any tasks to export yet.");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const data = JSON.stringify(tasks, null, 2);
+      const date = new Date().toISOString().split("T")[0];
+      const filename = `priorify-export-${date}.json`;
+      const fileUri = `${documentDirectory}${filename}`;
+
+      await writeAsStringAsync(fileUri, data);
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: "application/json",
+          dialogTitle: "Export Priorify Tasks",
+        });
+      } else {
+        Alert.alert(
+          "Export Complete",
+          `Your ${totalTasks} tasks are ready to copy from the file system.`,
+        );
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      Alert.alert("Export Failed", "Something went wrong while exporting your tasks.");
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleClearCompleted = () => {
@@ -89,9 +129,9 @@ export default function SettingsScreen() {
               </View>
             </View>
             <Switch
-              value={true}
-              onValueChange={() => {}}
-              trackColor={{ false: COLORS.tabInactive, true: COLORS.successLight }}
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+              trackColor={{ false: COLORS.tabInactive, true: COLORS.tabActive }}
               thumbColor={COLORS.textInverse}
             />
           </View>
@@ -117,11 +157,21 @@ export default function SettingsScreen() {
 
         {/* Data Section */}
         <View style={styles.section}>
-          <Pressable style={styles.itemRow} onPress={handleExportData}>
+          <Pressable 
+            style={styles.itemRow} 
+            onPress={handleExportData}
+            disabled={isExporting}
+          >
             <View style={styles.itemLeft}>
-              <Download size={20} color={COLORS.textPrimary} />
+              {isExporting ? (
+                <ActivityIndicator size="small" color={COLORS.textPrimary} />
+              ) : (
+                <Download size={20} color={COLORS.textPrimary} />
+              )}
               <View style={styles.itemText}>
-                <Text style={styles.itemLabel}>Export Data</Text>
+                <Text style={styles.itemLabel}>
+                  {isExporting ? "Exporting..." : "Export Data"}
+                </Text>
                 <Text style={styles.itemSubtitle}>Save as JSON</Text>
               </View>
             </View>
@@ -142,6 +192,8 @@ export default function SettingsScreen() {
             </View>
             <ChevronRight size={20} color={COLORS.textDisabled} />
           </Pressable>
+
+          <View style={styles.divider} />
         </View>
 
         {/* About Section */}
@@ -164,7 +216,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.surface,
+    backgroundColor: "#FFFFFF",
   },
   header: {
     paddingHorizontal: 20,

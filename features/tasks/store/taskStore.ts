@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import type { Task } from '@/features/tasks/types/task';
 import { StorageService } from '@/features/tasks/services/storage';
+import { NotificationService } from '@/shared/services/notificationService';
 
 interface TaskStore {
   tasks: Task[];
   isLoading: boolean;
   isInitialized: boolean;
+  taskNotificationIds: Map<string, string>;
 
   getTaskById: (id: string) => Task | undefined;
   addTask: (task: Task) => Promise<void>;
@@ -20,6 +22,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   tasks: [],
   isLoading: true,
   isInitialized: false,
+  taskNotificationIds: new Map<string, string>(),
 
   getTaskById: (id: string) => {
     return get().tasks.find((task) => task.id === id);
@@ -39,16 +42,30 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   addTask: async (task: Task) => {
     const currentTasks = get().tasks;
+    const currentNotificationIds = get().taskNotificationIds;
     set({ tasks: [...currentTasks, task] });
+    
     const success = await StorageService.saveTask(task);
     if (!success) {
       set({ tasks: currentTasks });
       console.error('Failed to persist task');
+      return;
+    }
+
+    // Schedule notification if task has deadline
+    if (task.deadline) {
+      const notificationId = await NotificationService.scheduleTaskReminder(task);
+      if (notificationId) {
+        const newNotificationIds = new Map(currentNotificationIds);
+        newNotificationIds.set(task.id, notificationId);
+        set({ taskNotificationIds: newNotificationIds });
+      }
     }
   },
 
   updateTask: async (id: string, updates: Partial<Task>) => {
     const currentTasks = get().tasks;
+    const currentNotificationIds = get().taskNotificationIds;
     const taskIndex = currentTasks.findIndex((t) => t.id === id);
     if (taskIndex === -1) return;
 
@@ -61,11 +78,46 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     if (!success) {
       set({ tasks: currentTasks });
       console.error('Failed to persist task update');
+      return;
+    }
+
+    // Handle notification updates
+    const existingNotificationId = currentNotificationIds.get(id);
+
+    // If deadline was removed or task completed, cancel notification
+    if (!updatedTask.deadline || updatedTask.completed) {
+      if (existingNotificationId) {
+        await NotificationService.cancelTaskReminder(existingNotificationId);
+        const newNotificationIds = new Map(currentNotificationIds);
+        newNotificationIds.delete(id);
+        set({ taskNotificationIds: newNotificationIds });
+      }
+      return;
+    }
+
+    // If deadline was added/updated, schedule new notification
+    const previousTask = currentTasks[taskIndex];
+    const deadlineChanged = previousTask.deadline !== updates.deadline;
+
+    if (deadlineChanged || !existingNotificationId) {
+      // Cancel existing notification first
+      if (existingNotificationId) {
+        await NotificationService.cancelTaskReminder(existingNotificationId);
+      }
+
+      // Schedule new notification
+      const notificationId = await NotificationService.scheduleTaskReminder(updatedTask);
+      if (notificationId) {
+        const newNotificationIds = new Map(currentNotificationIds);
+        newNotificationIds.set(id, notificationId);
+        set({ taskNotificationIds: newNotificationIds });
+      }
     }
   },
 
   removeTask: async (id: string) => {
     const currentTasks = get().tasks;
+    const currentNotificationIds = get().taskNotificationIds;
     const newTasks = currentTasks.filter((t) => t.id !== id);
     set({ tasks: newTasks });
 
@@ -73,11 +125,22 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     if (!success) {
       set({ tasks: currentTasks });
       console.error('Failed to remove task from storage');
+      return;
+    }
+
+    // Cancel any scheduled notification for this task
+    const notificationId = currentNotificationIds.get(id);
+    if (notificationId) {
+      await NotificationService.cancelTaskReminder(notificationId);
+      const newNotificationIds = new Map(currentNotificationIds);
+      newNotificationIds.delete(id);
+      set({ taskNotificationIds: newNotificationIds });
     }
   },
 
   clearCompleted: async () => {
     const currentTasks = get().tasks;
+    const currentNotificationIds = get().taskNotificationIds;
     const completedIds = currentTasks.filter((t) => t.completed).map((t) => t.id);
     
     if (completedIds.length === 0) return;
@@ -85,6 +148,20 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     // Optimistic update
     const newTasks = currentTasks.filter((t) => !t.completed);
     set({ tasks: newTasks });
+
+    // Cancel notifications for completed tasks
+    const notificationsToCancel = completedIds
+      .map((id) => currentNotificationIds.get(id))
+      .filter((id): id is string => id !== undefined);
+    
+    await Promise.all(
+      notificationsToCancel.map((id) => NotificationService.cancelTaskReminder(id))
+    );
+
+    // Clear notification IDs for completed tasks
+    const newNotificationIds = new Map(currentNotificationIds);
+    completedIds.forEach((id) => newNotificationIds.delete(id));
+    set({ taskNotificationIds: newNotificationIds });
 
     // Persist all deletions
     const results = await Promise.all(
@@ -100,6 +177,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
   toggleComplete: async (id: string) => {
     const currentTasks = get().tasks;
+    const currentNotificationIds = get().taskNotificationIds;
     const task = currentTasks.find((t) => t.id === id);
     if (!task) return;
 
@@ -115,6 +193,18 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     if (!success) {
       set({ tasks: currentTasks });
       console.error('Failed to persist toggleComplete');
+      return;
+    }
+
+    // Cancel notification when task is completed
+    if (newCompleted) {
+      const notificationId = currentNotificationIds.get(id);
+      if (notificationId) {
+        await NotificationService.cancelTaskReminder(notificationId);
+        const newNotificationIds = new Map(currentNotificationIds);
+        newNotificationIds.delete(id);
+        set({ taskNotificationIds: newNotificationIds });
+      }
     }
   },
 }));

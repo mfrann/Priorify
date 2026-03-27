@@ -9,7 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CalendarScreen() {
   const { tasks } = useTasks();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Helper para comparar fechas
   const isSameDay = (a: Date, b: Date) =>

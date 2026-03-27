@@ -1,7 +1,7 @@
 import type { Task } from "@/features/tasks/types/task";
 import { BUBBLE_SIZE, COLORS } from "@/shared/constants/theme";
 import { CircleCheck } from "lucide-react-native";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -15,6 +15,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { CompletionParticles } from "./CompletionParticles";
 
 interface BubbleItemProps {
   task: Task;
@@ -60,6 +61,7 @@ export function BubbleItem({
   const pressAnim = useSharedValue(1);
   const positionX = useSharedValue(offsetX);
   const positionY = useSharedValue(offsetY);
+  const [showParticles, setShowParticles] = useState(false);
 
   useEffect(() => {
     const delay = index * 50;
@@ -114,7 +116,21 @@ export function BubbleItem({
   }, [offsetX, offsetY, positionX, positionY]);
 
   // Handlers
-  const handleDoubleTap = onDoubleTap ?? (() => {});
+  const handleDoubleTap = useCallback(() => {
+    // Si NO está completada, marcar y mostrar partículas
+    if (!task.completed) {
+      setShowParticles(true);
+      onDoubleTap?.();
+    }
+    // Si está completada Y estamos en tab "Done", desmarcar
+    else if (task.completed) {
+      onDoubleTap?.();
+    }
+  }, [onDoubleTap, task.completed]);
+
+  const handleParticlesComplete = useCallback(() => {
+    setShowParticles(false);
+  }, []);
 
   // SINGLE-TAP gesture (reemplaza el onPress del Pressable)
   const singleTapGesture = Gesture.Tap()
@@ -161,6 +177,11 @@ export function BubbleItem({
       key={bubbleId}
       style={[styles.container, animatedStyle, { zIndex }]}
     >
+      <CompletionParticles
+        isActive={showParticles}
+        size={size}
+        onComplete={handleParticlesComplete}
+      />
       <GestureDetector gesture={combinedGesture}>
         <Pressable
           onPressIn={handlePressIn}

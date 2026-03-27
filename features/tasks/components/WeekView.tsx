@@ -11,7 +11,7 @@ interface WeekViewProps {
   onWeekChange: (date: Date) => void;
 }
 
-const WEEKDAYS_SHORT = ["S", "M", "T", "W", "T", "F", "S"];
+const WEEKDAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export function WeekView({
   tasks,

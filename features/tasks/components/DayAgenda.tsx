@@ -37,7 +37,7 @@ const TaskItem = ({ task, onPress }: TaskItemProps) => (
     </View>
     {task.completed && (
       <View style={styles.checkmark}>
-        <CircleCheck size={22} color={COLORS.success} />
+        <CircleCheck size={22} color={COLORS.tabActive} />
       </View>
     )}
   </Pressable>
